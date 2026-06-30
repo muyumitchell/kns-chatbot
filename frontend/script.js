@@ -1,5 +1,5 @@
 // ── CONFIG ──
-const BACKEND_URL = 'http://localhost:3000/chat';
+const BACKEND_URL = 'https://kns-chatbot-backend.onrender.com/chat';
 
 // ── GRAB ELEMENTS ──
 const bubbleBtn = document.getElementById('bubbleBtn');
