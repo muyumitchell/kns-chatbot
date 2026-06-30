@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kova — KNS Virtual Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- FLOATING BUBBLE BUTTON -->
+  <button class="bubble-btn" id="bubbleBtn" aria-label="Chat with Kova">
+    <span class="bubble-icon">💬</span>
+    <span class="unread-badge" id="unreadBadge">1</span>
+  </button>
+
+  <!-- CHAT WINDOW -->
+  <div class="chat-window" id="chatWindow">
+
+    <!-- HEADER -->
+    <div class="chat-header">
+      <div class="kova-avatar">K</div>
+      <div class="header-text">
+        <div class="header-name">Kova</div>
+        <div class="header-sub">
+          <span class="dot"></span>
+          <span>KNS Virtual Assistant</span>
+        </div>
+      </div>
+      <div class="kns-logo-text">KNS</div>
+      <button class="close-btn" id="closeBtn" aria-label="Close chat">✕</button>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="messages" id="messages"></div>
+
+    <!-- INPUT -->
+    <div class="write">
+      <div class="input-wrap">
+        <input
+          class="chat-input"
+          id="chatInput"
+          placeholder="Ask me anything about KNS..."
+          autocomplete="off"
+        />
+        <button class="send-btn" id="sendBtn" aria-label="Send message">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M60.7,53.6,50,64.3m0,0L39.3,53.6M50,64.3V35.7m0,46.4A32.1,32.1,0,1,1,82.1,50,32.1,32.1,0,0,1,50,82.1Z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-brand">
+      Powered by Konvergenz Network Solutions · kns.co.ke
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
