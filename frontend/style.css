@@ -53,9 +53,6 @@ body {
 
 /* ── FLOATING BUBBLE BUTTON ── */
 .bubble-btn {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -66,11 +63,9 @@ body {
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 24px rgba(200,16,46,0.5), 0 4px 16px rgba(0,0,0,0.4);
-  z-index: 1000;
   transition: transform 200ms, box-shadow 200ms;
   animation: bubblePop 400ms ease both;
 }
-
 .bubble-btn:hover {
   transform: scale(1.08);
   box-shadow: 0 0 32px rgba(200,16,46,0.7), 0 4px 20px rgba(0,0,0,0.4);
@@ -417,4 +412,169 @@ body {
 .message.bot li {
   margin-bottom: 4px;
   line-height: 1.5;
+}
+/* ── PAGE BACKGROUND ── */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0a0a1a 0%, #0d0d2b 50%, #1a0a0a 100%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+}
+.orb1 { width: 320px; height: 320px; background: #c8102e; top: -100px; right: -80px; }
+.orb2 { width: 260px; height: 260px; background: #2a2a6e; bottom: -80px; left: -60px; }
+
+.brand {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.95);
+  z-index: 1;
+  text-align: center;
+}
+.brand span { color: #c8102e; }
+
+.ticker-wrap {
+  margin-top: 16px;
+  width: 280px;
+  overflow: hidden;
+  z-index: 1;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+.ticker-track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  animation: scrollLeft 12s linear infinite;
+}
+
+.ticker-track span {
+  font-size: 16px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+}
+
+@keyframes scrollLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.footer-tag {
+  position: absolute;
+  bottom: 24px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.2);
+  z-index: 1;
+}
+
+/* make sure chat UI sits above the background */
+.bubble-btn,
+.chat-window {
+  z-index: 10;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(200,16,46,0.6);
+  border-radius: 50%;
+  animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(0); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  to   { transform: translateY(-400px); opacity: 0; }
+}
+.bubble-wrap {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+.bubble-label {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  animation: popIn 400ms ease 1s both;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 4px;
+  right: -28px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 200ms;
+  padding: 4px;
+}
+
+.message.bot:hover .copy-btn {
+  opacity: 0.6;
+}
+
+.copy-btn:hover {
+  opacity: 1 !important;
+}
+.escalate-bar {
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+
+.escalate-link {
+  color: rgba(200,16,46,0.8);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 150ms;
+}
+
+.escalate-link:hover {
+  color: #c8102e;
 }

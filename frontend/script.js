@@ -1,6 +1,19 @@
 // ── CONFIG ──
 const BACKEND_URL = 'https://kns-chatbot-backend.onrender.com/chat';
 
+
+// Generate floating particles for background
+const pageBg = document.getElementById('pageBg');
+for (let i = 0; i < 18; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.bottom = '-10px';
+  p.style.animationDuration = (8 + Math.random() * 8) + 's';
+  p.style.animationDelay = (Math.random() * 8) + 's';
+  pageBg.appendChild(p);
+}
+
 // ── GRAB ELEMENTS ──
 const bubbleBtn = document.getElementById('bubbleBtn');
 const unreadBadge = document.getElementById('unreadBadge');
@@ -69,8 +82,21 @@ function addMessage(text, type) {
 
   if (type === 'bot') {
     msg.innerHTML = formatMessage(text);
+
+    // Add copy button for bot messages
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.innerHTML = '📋';
+    copyBtn.title = 'Copy response';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(text);
+      copyBtn.innerHTML = '✓';
+      setTimeout(() => { copyBtn.innerHTML = '📋'; }, 1500);
+    };
+    msg.appendChild(copyBtn);
+    msg.style.position = 'relative';
   } else {
-    msg.textContent = text; // user messages stay plain, no need to format
+    msg.textContent = text;
   }
 
   messagesEl.appendChild(msg);
