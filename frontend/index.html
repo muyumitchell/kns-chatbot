@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kova — KNS Virtual Assistant</title>
   <link rel="stylesheet" href="style.css" />
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -16,21 +17,21 @@
 
     <div class="brand">KONVERGE<span>NZ</span></div>
     <div class="ticker-wrap">
-  <div class="ticker-track">
-    <span>SOLUTIONS</span>
-    <span>•</span>
-    <span>UNIFIED</span>
-    <span>•</span>
-    <span>SECURED</span>
-    <span>•</span>
-    <span>SOLUTIONS</span>
-    <span>•</span>
-    <span>UNIFIED</span>
-    <span>•</span>
-    <span>SECURED</span>
-    <span>•</span>
-  </div>
-</div>
+      <div class="ticker-track">
+        <span>SOLUTIONS</span>
+        <span>•</span>
+        <span>UNIFIED</span>
+        <span>•</span>
+        <span>SECURED</span>
+        <span>•</span>
+        <span>SOLUTIONS</span>
+        <span>•</span>
+        <span>UNIFIED</span>
+        <span>•</span>
+        <span>SECURED</span>
+        <span>•</span>
+      </div>
+    </div>
 
     <div class="footer-tag">EAST AFRICA'S ICT PARTNER SINCE 2014</div>
   </div>
@@ -63,10 +64,27 @@
 
     <!-- MESSAGES -->
     <div class="messages" id="messages"></div>
+
+    <!-- ESCALATION BAR -->
     <div class="escalate-bar">
-  <span>Need a human instead?</span>
-  <a href="mailto:info@kns.co.ke" class="escalate-link">Contact KNS team →</a>
-</div>
+      <span>Need a human instead?</span>
+      <button class="escalate-link" id="quoteBtn">Get a Quote →</button>
+    </div>
+
+    <!-- LEAD CAPTURE FORM (hidden by default) -->
+    <div class="lead-form-overlay" id="leadFormOverlay">
+      <div class="lead-form">
+        <div class="lead-form-header">
+          <span>Get a Quote from KNS</span>
+          <button class="lead-form-close" id="leadFormClose">✕</button>
+        </div>
+        <input type="text" id="leadName" class="lead-input" placeholder="Your name" />
+        <input type="email" id="leadEmail" class="lead-input" placeholder="Your email" />
+        <textarea id="leadMessage" class="lead-input lead-textarea" placeholder="What do you need help with?"></textarea>
+        <button class="lead-submit" id="leadSubmit">Send Request</button>
+        <div class="lead-status" id="leadStatus"></div>
+      </div>
+    </div>
 
     <!-- INPUT -->
     <div class="write">

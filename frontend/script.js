@@ -272,3 +272,66 @@ chatInput.addEventListener('keypress', (e) => {
     sendMessage(text);
   }
 });
+// ── LEAD CAPTURE ──
+emailjs.init('cukLKBDGqgPywkKaR');
+
+const quoteBtn = document.getElementById('quoteBtn');
+const leadFormOverlay = document.getElementById('leadFormOverlay');
+const leadFormClose = document.getElementById('leadFormClose');
+const leadSubmit = document.getElementById('leadSubmit');
+const leadName = document.getElementById('leadName');
+const leadEmail = document.getElementById('leadEmail');
+const leadMessage = document.getElementById('leadMessage');
+const leadStatus = document.getElementById('leadStatus');
+
+quoteBtn.addEventListener('click', () => {
+  leadFormOverlay.classList.add('visible');
+});
+
+leadFormClose.addEventListener('click', () => {
+  leadFormOverlay.classList.remove('visible');
+  leadStatus.textContent = '';
+  leadStatus.className = 'lead-status';
+});
+
+leadSubmit.addEventListener('click', () => {
+  const name = leadName.value.trim();
+  const email = leadEmail.value.trim();
+  const message = leadMessage.value.trim();
+
+  if (!name || !email || !message) {
+    leadStatus.textContent = 'Please fill in all fields.';
+    leadStatus.className = 'lead-status error';
+    return;
+  }
+
+  leadSubmit.disabled = true;
+  leadStatus.textContent = 'Sending...';
+  leadStatus.className = 'lead-status';
+
+  emailjs.send('service_ykifmb7', 'template_yr6t8xh', {
+    from_name: name,
+    from_email: email,
+    message: message
+  })
+  .then(() => {
+    leadStatus.textContent = 'Thanks! KNS will be in touch soon 🎉';
+    leadStatus.className = 'lead-status success';
+    leadName.value = '';
+    leadEmail.value = '';
+    leadMessage.value = '';
+    leadSubmit.disabled = false;
+
+    setTimeout(() => {
+      leadFormOverlay.classList.remove('visible');
+      leadStatus.textContent = '';
+      leadStatus.className = 'lead-status';
+    }, 2500);
+  })
+  .catch((error) => {
+    console.error('EmailJS error:', error);
+    leadStatus.textContent = 'Something went wrong. Please try again.';
+    leadStatus.className = 'lead-status error';
+    leadSubmit.disabled = false;
+  });
+});
