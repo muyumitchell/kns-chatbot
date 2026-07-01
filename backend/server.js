@@ -68,26 +68,40 @@ app.post('/chat', async (req, res) => {
       { role: 'user', content: message }
     ];
 
-    const response = await groq.chat.completions.create({
+    // Set headers for streaming
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const stream = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: messages,
       max_tokens: 500,
-      temperature: 0.7
+      temperature: 0.7,
+      stream: true   // ← this is the key change
     });
 
-    const reply = response.choices[0].message.content;
-    res.json({ reply });
+    // Send each chunk as it arrives
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || '';
+      if (content) {
+        res.write(`data: ${JSON.stringify({ content })}\n\n`);
+      }
+    }
 
-  } catch (error) {
+    res.write('data: [DONE]\n\n');
+    res.end();
+
+ } catch (error) {
     console.error('Groq API error:', error);
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    res.write(`data: ${JSON.stringify({ error: 'Something went wrong. Please try again.' })}\n\n`);
+    res.end();
   }
 });
 
 app.get('/', (req, res) => {
   res.json({ status: 'KNS Chatbot backend is running' });
 });
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`KNS Chatbot server running on port ${PORT}`);

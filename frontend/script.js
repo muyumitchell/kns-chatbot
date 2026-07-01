@@ -149,18 +149,21 @@ function removeTyping() {
   if (typing) typing.remove();
 }
 
-// ── CORE: send a message to the backend and display the response ──
 async function sendMessage(text) {
   if (!text.trim()) return;
 
   // Show user's message immediately
   addMessage(text, 'user');
-
-  // Add to history
   conversationHistory.push({ role: 'user', content: text });
 
-  // Show typing indicator
-  showTyping();
+  // Create an empty bot message bubble that we'll fill in as chunks arrive
+  const msgEl = document.createElement('div');
+  msgEl.className = 'message bot';
+  msgEl.style.position = 'relative';
+  messagesEl.appendChild(msgEl);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  let fullReply = '';
 
   try {
     const response = await fetch(BACKEND_URL, {
@@ -168,24 +171,62 @@ async function sendMessage(text) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: text,
-        history: conversationHistory.slice(0, -1) // history BEFORE this message
+        history: conversationHistory.slice(0, -1)
       })
     });
 
-    const data = await response.json();
-    removeTyping();
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
 
-    if (data.reply) {
-      addMessage(data.reply, 'bot');
-      conversationHistory.push({ role: 'assistant', content: data.reply });
-    } else {
-      addMessage("Sorry, something went wrong. Please try again or contact info@kns.co.ke", 'bot');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n').filter(line => line.startsWith('data: '));
+
+      for (const line of lines) {
+        const dataStr = line.replace('data: ', '');
+        if (dataStr === '[DONE]') continue;
+
+        try {
+          const data = JSON.parse(dataStr);
+          if (data.content) {
+            fullReply += data.content;
+            msgEl.innerHTML = formatMessage(fullReply);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          }
+          if (data.error) {
+            msgEl.innerHTML = formatMessage(data.error);
+          }
+        } catch (e) {
+          // ignore parse errors on incomplete chunks
+        }
+      }
     }
+
+    // Add copy button now that streaming is done
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.innerHTML = '📋';
+    copyBtn.title = 'Copy response';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(fullReply);
+      copyBtn.innerHTML = '✓';
+      setTimeout(() => { copyBtn.innerHTML = '📋'; }, 1500);
+    };
+    msgEl.appendChild(copyBtn);
+
+    conversationHistory.push({ role: 'assistant', content: fullReply });
+
+    const time = document.createElement('div');
+    time.className = 'timestamp';
+    time.textContent = getTime();
+    messagesEl.appendChild(time);
 
   } catch (error) {
     console.error('Error talking to backend:', error);
-    removeTyping();
-    addMessage("I'm having trouble connecting right now. Please try again shortly.", 'bot');
+    msgEl.textContent = "I'm having trouble connecting right now. Please try again shortly.";
   }
 }
 
