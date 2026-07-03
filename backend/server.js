@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const Groq = require('groq-sdk');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -9,6 +11,27 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 app.use(cors());
 app.use(express.json());
 
+// ── ANALYTICS LOGGING SETUP ──
+const LOG_FILE = path.join(__dirname, 'chat_logs.json');
+
+function readLogs() {
+  try {
+    if (fs.existsSync(LOG_FILE)) {
+      return JSON.parse(fs.readFileSync(LOG_FILE, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Error reading logs:', e);
+  }
+  return [];
+}
+
+function saveLog(entry) {
+  const logs = readLogs();
+  logs.push(entry);
+  fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
+}
+
+// ── SYSTEM PROMPT ──
 const KNS_SYSTEM_PROMPT = `
 You are Kova, a friendly and knowledgeable assistant for Konvergenz Network Solutions (KNS) — 
 an East African ICT company founded in 2014 and headquartered in Upperhill, Nairobi.
@@ -54,6 +77,7 @@ Nutanix, SailPoint, Red Hat, F5, BeyondTrust
 - Do not discuss competitors or anything outside KNS's services
 `;
 
+// ── CHAT ROUTE (with streaming) ──
 app.post('/chat', async (req, res) => {
   const { message, history } = req.body;
 
@@ -62,13 +86,18 @@ app.post('/chat', async (req, res) => {
   }
 
   try {
+    // Log this question for analytics
+    saveLog({
+      question: message,
+      timestamp: new Date().toISOString()
+    });
+
     const messages = [
       { role: 'system', content: KNS_SYSTEM_PROMPT },
       ...history,
       { role: 'user', content: message }
     ];
 
-    // Set headers for streaming
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -78,10 +107,9 @@ app.post('/chat', async (req, res) => {
       messages: messages,
       max_tokens: 500,
       temperature: 0.7,
-      stream: true   // ← this is the key change
+      stream: true
     });
 
-    // Send each chunk as it arrives
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || '';
       if (content) {
@@ -92,16 +120,30 @@ app.post('/chat', async (req, res) => {
     res.write('data: [DONE]\n\n');
     res.end();
 
- } catch (error) {
+  } catch (error) {
     console.error('Groq API error:', error);
     res.write(`data: ${JSON.stringify({ error: 'Something went wrong. Please try again.' })}\n\n`);
     res.end();
   }
 });
 
+// ── ANALYTICS ROUTE ──
+app.get('/analytics', (req, res) => {
+  const logs = readLogs();
+
+  res.json({
+    totalConversations: logs.length,
+    recentQuestions: logs.slice(-20).reverse(),
+    logs: logs
+  });
+});
+
+// ── HEALTH CHECK ──
 app.get('/', (req, res) => {
   res.json({ status: 'KNS Chatbot backend is running' });
 });
+
+// ── START SERVER ──
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`KNS Chatbot server running on port ${PORT}`);
