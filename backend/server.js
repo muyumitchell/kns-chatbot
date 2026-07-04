@@ -53,11 +53,15 @@ function readLogs() {
 }
 
 function saveLog(entry) {
-  const logs = readLogs();
+  let logs = readLogs();
   logs.push(entry);
+
+  // Keep only the last 7 days of history
+  const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+  logs = logs.filter(log => new Date(log.timestamp).getTime() > sevenDaysAgo);
+
   fs.writeFileSync(LOG_FILE, JSON.stringify(logs, null, 2));
 }
-
 // ── SYSTEM PROMPT ──
 const KNS_SYSTEM_PROMPT = `
 You are Kova, a friendly and knowledgeable assistant for Konvergenz Network Solutions (KNS) — 
