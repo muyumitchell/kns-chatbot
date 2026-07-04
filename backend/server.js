@@ -4,12 +4,24 @@ const cors = require('cors');
 const Groq = require('groq-sdk');
 const fs = require('fs');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 app.use(cors());
 app.use(express.json());
+
+// ── RATE LIMITING ──
+// Limits each visitor to 20 messages per 10 minutes — enough for genuine use,
+// too little for spam/abuse to burn through your Groq quota.
+const chatLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 20,
+  message: { error: "You're sending messages too quickly. Please wait a few minutes and try again." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ── ANALYTICS LOGGING SETUP ──
 const LOG_FILE = path.join(__dirname, 'chat_logs.json');
@@ -77,8 +89,8 @@ Nutanix, SailPoint, Red Hat, F5, BeyondTrust
 - Do not discuss competitors or anything outside KNS's services
 `;
 
-// ── CHAT ROUTE (with streaming) ──
-app.post('/chat', async (req, res) => {
+// ── CHAT ROUTE (with streaming + rate limiting) ──
+app.post('/chat', chatLimiter, async (req, res) => {
   const { message, history } = req.body;
 
   if (!message) {
@@ -86,7 +98,6 @@ app.post('/chat', async (req, res) => {
   }
 
   try {
-    // Log this question for analytics
     saveLog({
       question: message,
       timestamp: new Date().toISOString()
