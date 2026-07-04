@@ -165,6 +165,12 @@ async function sendMessage(text) {
 
   let fullReply = '';
 
+  // Detect cold start — if no response chunk arrives within 3 seconds,
+  // show a "waking up" message so the wait doesn't look broken
+  let wakingUpTimeout = setTimeout(() => {
+    msgEl.innerHTML = `<em style="opacity:0.6;">Waking up Kova's servers... this can take up to 30 seconds on the first message. Thanks for your patience! ⏳</em>`;
+  }, 3000);
+
   try {
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
@@ -190,8 +196,9 @@ async function sendMessage(text) {
         if (dataStr === '[DONE]') continue;
 
         try {
-          const data = JSON.parse(dataStr);
+         const data = JSON.parse(dataStr);
           if (data.content) {
+            clearTimeout(wakingUpTimeout); // real content arrived, cancel the waking-up message
             fullReply += data.content;
             msgEl.innerHTML = formatMessage(fullReply);
             messagesEl.scrollTop = messagesEl.scrollHeight;

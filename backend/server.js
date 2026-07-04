@@ -9,7 +9,22 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-app.use(cors());
+const allowedOrigins = [
+  'https://fascinating-frangipane-c00de0.netlify.app',
+  'http://127.0.0.1:5500', // for local testing with Live Server
+  'http://localhost:5500'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like curl or Postman) for your own testing
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 app.use(express.json());
 
 // ── RATE LIMITING ──
